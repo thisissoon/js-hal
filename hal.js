@@ -137,7 +137,7 @@
         return new Resource(object);
       }));
     } else {
-      this._embedded[rel].push(Resource(resource));
+      this._embedded[rel] = Resource(resource);
     }
 
     return this;
@@ -180,7 +180,10 @@
           // Come on, resource one is *really* dumb.
           result._embedded = {};
           for (var rel in resource._embedded) {
-            result._embedded[rel] = resource._embedded[rel].map(resourceToJsonObject);
+            if (Array.isArray(resource._embedded[rel]))
+              result._embedded[rel] = resource._embedded[rel].map(resourceToJsonObject);
+            else
+              result._embedded[rel] = resourceToJsonObject(resource._embedded[rel])
           }
         }
 
