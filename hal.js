@@ -104,16 +104,14 @@
       link = Link(arguments[0], arguments[1]);
     }
 
-    if (typeof this._links[link.rel] === "undefined")
-        this._links[link.rel] = link;
-    else
-      if (Array.isArray(this._links[link.rel]))
-        this._links[link.rel].push(link)
-      else {
-        var old_link = this._links[link.rel]
-        this._links[link.rel] = new Array(old_link,link)
-      }
-
+    if (typeof this._links[link.rel] === "undefined") {
+      this._links[link.rel] = link;
+    } else if (Array.isArray(this._links[link.rel])) {
+      this._links[link.rel].push(link)
+    } else {
+      this._links[link.rel] = [this._links[link.rel], link]
+    }
+    
     return this;
   };
 
@@ -122,7 +120,13 @@
    * @param String rel → the relation identifier (should be plural)
    * @param Resource|Resource[] → resource(s) to embed
    */
-  Resource.prototype.embed = function (rel, resource) {
+  Resource.prototype.embed = function (rel, resource, pluralize) {
+    if (typeof pluralize === 'undefined') pluralize = true;
+
+    // [Naive pluralize](https://github.com/naholyr/js-hal#why-this-crappy-singularplural-management%E2%80%AF)
+    if (pluralize && rel.substring(rel.length - 1) !== 's') {
+      rel += 's';
+    }
 
     // Initialize embedded container
     if (this._embedded[rel] && !Array.isArray(this._embedded[rel])) {
